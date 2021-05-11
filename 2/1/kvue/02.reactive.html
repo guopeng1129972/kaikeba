@@ -1,0 +1,29 @@
+<div id="app"></div>
+<script>
+  // defineReactive 的功能是封装了一个方法，使给传进来的obj一个响应式的属性
+  function defineReactive(obj, key, val) {
+    Object.defineProperty(obj, key, {
+      get() {
+        console.log("get", key);
+        return val;
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          console.log("set", key);
+          val = newVal;
+        }
+        // 视图的更新函数 在set的时候，触发视图的更新
+        update();
+      },
+    });
+  }
+  const obj = {};
+  defineReactive(obj, "foo", "foo");
+  function update() {
+    app.innerText = obj.foo;
+  }
+  setInterval(() => {
+    // new Date().toLocaleTimeString(); 返回本地时间 时分
+    obj.foo = new Date().toLocaleTimeString();
+  }, 1000);
+</script>
