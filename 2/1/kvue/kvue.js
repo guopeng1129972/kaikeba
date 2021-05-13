@@ -3,12 +3,12 @@ function defineReactive(obj, key, val) {
   observe(val); //get bas; get n
   Object.defineProperty(obj, key, {
     get() {
-      console.log("get", key);
+      // console.log("get", key);
       return val;
     },
     set(newVal) {
       if (newVal !== val) {
-        console.log("set", key);
+        // console.log("set", key);
         val = newVal;
         // 当用户直接替换属性时，添加监听
         observe(newVal);
@@ -54,12 +54,15 @@ class Compile {
       // 判断节点类型
       if (this.isElement(n)) {
         // 如果子元素也是childNodes需要递归
-        console.log("编译节点", n.nodeName);
+        // console.log("编译节点", n.nodeName);
+        this.compileElemet(n);
         if (n.childNodes.length > 0) {
           this.compile(n);
         }
       } else if (this.isInter(n)) {
-        console.log("编译文本", n.textContent);
+        // console.log("编译文本", n.textContent);
+        // 动态插值表达
+        this.compileText(n);
       }
     });
   }
@@ -68,6 +71,32 @@ class Compile {
   }
   isInter(n) {
     return n.nodeType === 3 && /\{\{(.*)\}\}/.test(n.textContent);
+  }
+  //编译插值文本
+  compileText(n) {
+    n.textContent = this.$vm[RegExp.$1];
+  }
+  //编译元素：遍历它的所有特性
+  compileElemet(n) {
+    const attrs = n.attributes;
+    Array.from(attrs).forEach((attr) => {
+      // k-text='xxx' name k-text ,value xxx
+      const attrName = attr.name;
+      const exp = attr.value;
+      if (this.isDir(attrName)) {
+        const dir = attrName.substring(2);
+        // 判断当前的this下有没有dir(test)这个表达式，如果有就执行，如果没有就不会执行
+        this[dir] && this[dir](n, exp);
+      }
+    });
+  }
+  // k-text
+  text(node, exp) {
+    node.textContent = this.$vm[exp];
+  }
+
+  isDir(attrName) {
+    return attrName.startsWith("k-");
   }
 }
 // 监听响应式数据,根据传入的值做相应的处理
