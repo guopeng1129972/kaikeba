@@ -27,7 +27,7 @@ exports.default = function (a, b) {
 ### 1. 模拟 exports 对象
 
 exports 对象干了什么？
-首先，如果在 nodejs 打包的时候，我们会使用 sfs.readfileSync()读取 js 文件。
+首先，如果在 nodejs 打包的时候，我们会使用 fs.readfileSync()读取 js 文件。
 这样的话 js 文件会是一个字符串。如果需要将字符串中的代码运行起来，有两个方法，new Function 和 eval
 eval 比 new Function 效率更高
 
@@ -113,4 +113,38 @@ var add=require('add.js').default
 
 #### src/add.js
 
+```js
+export default (a, b) => {
+  return a + b;
+};
+```
+
 #### src/index.js
+
+```js
+import { add } from "./add.js";
+console.log(add(1, 2));
+```
+
+### 1. 分析模块
+
+模块分析分为 3 步：
+
+1. 读取文件
+2. 收集依赖
+3. 编译与 AST 解析
+
+#### 读取文件
+
+读取文件类似于解析高级语言，就是将字符串转换成 AST，这一步可以使用 babel/parser
+
+```bash
+yarn add @babel/parser
+yarn add @babel/traverse
+yarn add @babel/core
+yarn add @babel/preset-env
+```
+
+```js
+const
+```

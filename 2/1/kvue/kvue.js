@@ -87,6 +87,9 @@ class Compile {
         const dir = attrName.substring(2);
         // 判断当前的this下有没有dir(test)这个表达式，如果有就执行，如果没有就不会执行
         this[dir] && this[dir](n, exp);
+      } else if (this.isEvent(attrName)) {
+        const dir = attrName.substring(1);
+        this[dir] && this[dir](n, exp);
       }
     });
   }
@@ -94,9 +97,22 @@ class Compile {
   text(node, exp) {
     node.textContent = this.$vm[exp];
   }
+  // k-html
+  html(node, exp) {
+    node.innerHTML = this.$vm[exp];
+  }
+  // @click
+  click(node, exp) {
+    // debugger;
+    node.addEventListener("click",this.$vm.$methods[exp], true);
+  }
 
   isDir(attrName) {
     return attrName.startsWith("k-");
+  }
+
+  isEvent(attrName) {
+    return attrName.startsWith("@");
   }
 }
 // 监听响应式数据,根据传入的值做相应的处理
@@ -120,6 +136,7 @@ class KVue {
     // 0.保存选项
     this.$options = options;
     this.$data = options.data;
+    this.$methods = options.methods;
     // 1.对data进行响应式处理
     observe(options.data);
     // 2.代理

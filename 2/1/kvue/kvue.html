@@ -10,6 +10,7 @@
     <div id="app">
       <p>{{counter}}</p>
       <p k-text="counter"></p>
+      <p k-html="html" @click="console"></p>
     </div>
     <script src="./kvue.js"></script>
     <script>
@@ -18,7 +19,14 @@
         // 添加对data的响应式处理
         data: {
           counter: 1,
+          html: `<span>1</span>`,
+          acc:'this is output'
         },
+        methods:{
+          console(acc){
+            console.log(acc)
+          }
+        }
       });
       setInterval(() => {
         // console.log(11);
