@@ -94,5 +94,47 @@ class VueRouter {
 }
 ```
 
-- 为啥么使用 vue.set()不行？因为 vue.set(obj,'key','value'),的 obj 首先得是响应式对象，当前情况不行 
-  因为VueRouter不是响应式对象
+- 为啥么使用 vue.set()不行？因为 vue.set(obj,'key','value'),的 obj 首先得是响应式对象，当前情况不行
+  因为 VueRouter 不是响应式对象
+
+# 实现 vuex
+
+## src/kstore/kvuex.js
+
+## src/kstore/index.js
+
+- 同理创建 Store 类
+- 实现 install 方法，mixin beforeCreate 的时候注册$store
+
+```js
+function install(_vue) {
+  Vue = _vue;
+  // 注册$store
+  Vue.mixin({
+    beforeCreate() {
+      if (this.$options.store) {
+        Vue.prototype.$store = this.$options.store;
+      }
+    },
+  });
+}
+```
+
+- 处理响应式数据
+
+```js
+// 响应式处理的数据
+this.state = new Vue({
+  data: options.state,
+});
+setInterval(() => {
+  this.state.counter++;
+}, 1000);
+```
+- 这样是可以，但是暴露了Vue实例，不利于使用
+  因为使用框架的人可以随时修改Vue实例上的方法，可能会带来其他的bug
+  这样显得过于简单
+- 所以要使用封装的去实现
+
+- 实现getter
+- 实现深层的vue-router
