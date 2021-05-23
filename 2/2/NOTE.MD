@@ -1,0 +1,142 @@
+# 第三节： vue2 源码剖析 01
+
+## 搭建调试环境
+
+- 获取地址：git clone https://github.com/vuejs/vue.git
+- 安装依赖 npm install
+- 安装 rollup: npm install --global rollup
+- 修改 dev 脚本 ：添加 --sourcemap
+- 执行 dev 脚本:npm run dev
+
+## 调试技巧
+
+- chrom 打开指定文件 command+p
+- 断点
+
+# 源码根目录
+
+```bash
+tree -L 1 -d
+├── benchmarks
+├── build/config 打包构建脚本
+├── dist 发布目录
+├── examples 范例，里面有测试代码
+├── flow 针对flow的类型声明
+├── node_modules
+├── packages 核心代码之外的独立库
+├── //script 构建脚本(最新版本集成到build里面)
+├── src 源码
+├── test
+└── types  针对ts的类型声明
+```
+
+# 源码 src 目录
+
+```bash
+src
+├── compiler 编译器相关
+├── core 核心代码
+│ ├── components 通用组件比如keep-alive
+│ ├── global-api 全局API 静态方法 use() set()
+│ ├── instance 构造函数等
+│ ├── observer 响应式相关
+│ ├── util 工具函数等 defineActive
+│ └── vdom 虚拟dom相关
+├── platforms
+│  ├── web  浏览器平台
+│  └── weex 移动端平台
+├── server  服务端渲染相关
+├── sfc 单文件组件相关
+└── shared
+```
+
+- compiler 编译器 作用：将用户写的 template 编译成为 vdom
+
+# 编译生成
+
+- runtime:仅包含运行时，不包含编译时（不能写 template 选项）
+- common:cjs 规范，用于 webpack1，用于服务端渲染
+- esm:ES 模块，用于 webpack2+ 开发环境使用（平常用）
+- umd:universal module definition 兼容 cjs 与 amd，用于浏览器(什么都不带)
+
+# Vue 的初始化过程？ new Vue()都做了什么？
+
+- 通过 package.json 查找入口文件
+  "dev": "rollup -w -c build/config.js --sourcemap --environment TARGET:web-full-dev"
+  `--environment TARGET:web-full-dev` 为环境变量参数
+- build/config.js 的 web-full-dev 就配置了入口文件
+
+```js
+  // Runtime+compiler development build (Browser)
+  'web-full-dev': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.js'),
+    format: 'umd',
+    env: 'development',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+```
+
+- 入口文件 `web/entry-runtime-with-compiler.js`,这都是 resolve 函数的参数，并不是绝对路径
+
+```js
+const resolve = (p) => {
+  // p => web/xxx
+  const base = p.split("/")[0];
+  if (aliases[base]) {
+    return path.resolve(aliases[base], p.slice(base.length + 1));
+  } else {
+    return path.resolve(__dirname, "../", p);
+  }
+};
+```
+
+- resolve 方法接收参数并 split("/")[0]，得到`web`,aliases[web],aliases 是一个集合，可以在它里面
+  找到最终的路径，就找到入口文件了
+
+# build/alias.js
+
+```js
+module.exports = {
+  // ...
+  core: resolve("src/core"),
+  shared: resolve("src/shared"),
+  web: resolve("src/platforms/web"),
+  //...
+};
+```
+
+## src/platforms/web/entry-runtime-with-compiler.js
+
+- 得到入口文件
+- 扩展$mount 方法，扩展的目的是添加处理 template 与 el 方法
+
+```js
+//扩展了$mount方法
+const mount = Vue.prototype.$mount;
+Vue.prototype.$mount = function (el?: string | Element, hydrating?: boolean) {
+  //...
+  // 又返回了当前的mount对象
+  return mount.call(this, el, hydrating);
+};
+```
+
+## src/platforms/web/runtime/index.js
+
+- 1.实现了 patch 函数 patch 的用法
+- patch 的两个用法
+  1.vdom=>dom 初始化时，vdom 生成 dom 操作
+  2.update vdom =>diff => dom operation(update del change)
+  数据更新时，vdom diff 发生 dom 的 operation 时候触发
+- 2.实现了$mount 实现挂载
+- 但是到现在还没有找到运行时
+
+## src/core/index.js
+
+核心运行时
+
+```js
+// 1.初始化全局api:Vue.set/delete/use/component/...
+initGlobalAPI(Vue);
+```
