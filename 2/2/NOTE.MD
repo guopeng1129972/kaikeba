@@ -134,9 +134,24 @@ Vue.prototype.$mount = function (el?: string | Element, hydrating?: boolean) {
 
 ## src/core/index.js
 
-核心运行时
+- 核心运行时，在这里初始化全局静态方法, 初始化全局 api:Vue.set/delete/use/component/...
 
 ```js
 // 1.初始化全局api:Vue.set/delete/use/component/...
 initGlobalAPI(Vue);
+```
+
+- 比如 use 方法 src/core/global-api/use.js
+
+```js
+// 1.比如 Vue.use(VueRouter,args,...)，截取VueRouter，把后面的转化为一个数组args
+const args = toArray(arguments, 1);
+// 2.组件在使用的时候，会传进来一个vue的构造函数_vue就是这里的this
+//3.比如function install(Vue,arg1,arg2)
+args.unshift(this);
+if (typeof plugin.install === "function") {
+  plugin.install.apply(plugin, args);
+} else if (typeof plugin === "function") {
+  plugin.apply(null, args);
+}
 ```
