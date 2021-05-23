@@ -29,12 +29,15 @@ export function initMixin (Vue: Class<Component>) {
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
+    //1.合并选项
+    // user options + system options
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // 2.可以通过this.$options访问
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -48,13 +51,15 @@ export function initMixin (Vue: Class<Component>) {
       vm._renderProxy = vm
     }
     // expose real self
+    // 3.初始化过程
     vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
-    initRender(vm)
+    initLifecycle(vm) //4. 初始化属性 $children,$root,$par...
+    initEvents(vm)  //5.自定义事件的监听 @click ...
+    initRender(vm)  //6.插槽解析 _c和$createElement()<=>h的声明
     callHook(vm, 'beforeCreate')
+    // 7.初始化各种状态
     initInjections(vm) // resolve injections before data/props
-    initState(vm)
+    initState(vm) //8.props data methods watch
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 

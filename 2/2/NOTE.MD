@@ -59,7 +59,7 @@ src
 - esm:ES 模块，用于 webpack2+ 开发环境使用（平常用）
 - umd:universal module definition 兼容 cjs 与 amd，用于浏览器(什么都不带)
 
-# Vue 的初始化过程？ new Vue()都做了什么？
+# 查找 vue 编译以及运行时
 
 - 通过 package.json 查找入口文件
   "dev": "rollup -w -c build/config.js --sourcemap --environment TARGET:web-full-dev"
@@ -154,4 +154,78 @@ if (typeof plugin.install === "function") {
 } else if (typeof plugin === "function") {
   plugin.apply(null, args);
 }
+```
+
+## src/core/instance/index.js
+
+```js
+//2. 一下5个方法，均为实现Vue的实例方法和属性
+initMixin(Vue);
+stateMixin(Vue);
+eventsMixin(Vue);
+lifecycleMixin(Vue);
+renderMixin(Vue);
+```
+
+## src/core/instance/init.js 以 initMixin()为例
+
+```js
+//1.合并选项
+// user options + system options
+if (options && options._isComponent) {
+  // optimize internal component instantiatio
+} else {
+  // 2.可以通过this.$options访问
+  vm.$options = mergeOptions(resolveConstructorOptions(vm.constructor));
+}
+// 3.初始化过程
+vm._self = vm;
+initLifecycle(vm); //4. 初始化属性 $children,$root,$par...
+initEvents(vm); //5.自定义事件的监听 @click ...
+initRender(vm); //6.插槽解析 _c和$createElement()<=>h的声明
+callHook(vm, "beforeCreate");
+// 7.初始化各种状态
+initInjections(vm); // resolve injections before data/props
+initState(vm); //8.props data methods watch
+initProvide(vm); // resolve provide after data/props
+callHook(vm, "created");
+```
+
+## src/core/instance/render.js
+
+```js
+// 1.插槽的解析
+vm.$slots = resolveSlots(options._renderChildren, renderContext);
+vm.$scopedSlots = emptyObject;
+//2.render(h)中的 h就是$createElement 如果是编译器编译出来的结果，就是_c
+vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false);
+vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true);
+```
+
+# Vue 的初始化过程？ new Vue()都做了什么？
+执行_init()方法；
+- 组件实例初始化属性， initLifecycle 比如$children,$root,主要是按照protp声明当前的组件所在位置
+- 整合options  合并选项  user options + system options
+- 处理自定义事件 initEvents @click
+- 处理插槽信息 initRender
+- 最重要的是组件状态初始化、响应式等事情 initInjections initState initProvide
+- 两个生命周期的调用
+```js
+initMixin(Vue);
+
+vm._self = vm;
+initLifecycle(vm); //4. 初始化属性 $children,$root,$par...
+initEvents(vm); //5.自定义事件的监听 @click ...
+initRender(vm); //6.插槽解析 _c和$createElement()<=>h的声明
+callHook(vm, "beforeCreate");
+// 7.初始化各种状态
+initInjections(vm); // resolve injections before data/props
+initState(vm); //8.props data methods watch
+initProvide(vm); // resolve provide after data/props
+callHook(vm, "created");
+
+stateMixin(Vue);
+eventsMixin(Vue);
+lifecycleMixin(Vue);
+renderMixin(Vue);
 ```
