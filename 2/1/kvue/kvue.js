@@ -1,9 +1,12 @@
 function defineReactive(obj, key, val) {
   //递归，如果val 即监听的对象的元素是一个对象，形如obj.baz.n,就先对子元素进行监听
   observe(val); //get bas; get n
+  const dep = new Dep();
   Object.defineProperty(obj, key, {
     get() {
       // console.log("get", key);
+      // 依赖收集
+      Dep.target && dep.addDep(Dep.target);
       return val;
     },
     set(newVal) {
@@ -12,6 +15,8 @@ function defineReactive(obj, key, val) {
         val = newVal;
         // 当用户直接替换属性时，添加监听
         observe(newVal);
+        // update() 触发依赖
+        dep.notify();
       }
     },
   });
@@ -74,7 +79,9 @@ class Compile {
   }
   //编译插值文本
   compileText(n) {
-    n.textContent = this.$vm[RegExp.$1];
+    console.log(RegExp.$1);
+    // n.textContent = this.$vm[RegExp.$1];
+    this.update(n, RegExp.$1, "text");
   }
   //编译元素：遍历它的所有特性
   compileElemet(n) {
@@ -93,18 +100,33 @@ class Compile {
       }
     });
   }
+  update(node, exp, dir) {
+    // 1.init
+    const fn = this[dir + "Updater"];
+    fn && fn(node, this.$vm[exp]);
+    // 2.update
+    new Watcher(this.$vm, exp, (val) => {
+      fn && fn(node, val);
+    });
+  }
   // k-text
   text(node, exp) {
-    node.textContent = this.$vm[exp];
+    this.update(node, exp, "text");
+  }
+  textUpdater(node, val) {
+    node.textContent = val;
   }
   // k-html
   html(node, exp) {
-    node.innerHTML = this.$vm[exp];
+    this.update(node, exp, "html");
+  }
+  htmlUpdater(node, val) {
+    node.innerHTML = val;
   }
   // @click
   click(node, exp) {
     // debugger;
-    node.addEventListener("click",this.$vm.$methods[exp], true);
+    node.addEventListener("click", this.$vm.$methods[exp], true);
   }
 
   isDir(attrName) {
@@ -143,5 +165,34 @@ class KVue {
     proxy(this);
     // 3.编译
     new Compile(options.el, this);
+  }
+}
+
+class Watcher {
+  constructor(vm, key, updater) {
+    this.vm = vm;
+    this.key = key;
+    this.updater = updater;
+    // 在watcher上创建dep的target绑定this,然后get过程触发
+    Dep.target = this;
+    this.vm[this.key];
+    Dep.target = null;
+  }
+  // 将来会被Dep调用
+  update() {
+    this.updater.call(this.vm, this.vm[this.key]);
+  }
+}
+// Dep类 实现对watcher的管理，保存watcher实例的依赖的类
+class Dep {
+  constructor() {
+    this.deps = [];
+  }
+  // 这里的dep就是watcher的实例
+  addDep(dep) {
+    this.deps.push(dep);
+  }
+  notify() {
+    this.deps.forEach((dep) => dep.update());
   }
 }
