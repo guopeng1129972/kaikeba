@@ -496,18 +496,26 @@ export function createPatchFunction (backend) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
+    //myCommit1 判断是不是元素
     if (isUndef(vnode.text)) {
+      //myCommit2 判断是不是有子节点
       if (isDef(oldCh) && isDef(ch)) {
+        //myCommit3 递归比较 子节点
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
+        //myCommit4 新节点有孩子
         if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
+        //myCommit5 创建子节点并添加
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
       } else if (isDef(oldCh)) {
+        //myCommit6 老节点有孩子 删除节点
         removeVnodes(elm, oldCh, 0, oldCh.length - 1)
       } else if (isDef(oldVnode.text)) {
+         //myCommit7 老节点存在文本，清空
         nodeOps.setTextContent(elm, '')
       }
     } else if (oldVnode.text !== vnode.text) {
+      //双方都是文本节点，更新文本
       nodeOps.setTextContent(elm, vnode.text)
     }
     if (isDef(data)) {
