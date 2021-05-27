@@ -52,6 +52,7 @@ export function initState (vm: Component) {
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
+    // mycommit2 处理data
     initData(vm)
   } else {
     observe(vm._data = {}, true /* asRootData */)
@@ -148,6 +149,7 @@ function initData (vm: Component) {
     }
   }
   // observe data
+  // mycommit 递归遍历、对data做响应式处理
   observe(data, true /* asRootData */)
 }
 

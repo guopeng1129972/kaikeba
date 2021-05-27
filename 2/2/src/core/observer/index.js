@@ -42,6 +42,7 @@ export class Observer {
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
+    // mycommit 如果是数组
     if (Array.isArray(value)) {
       const augment = hasProto
         ? protoAugment
@@ -49,6 +50,7 @@ export class Observer {
       augment(value, arrayMethods, arrayKeys)
       this.observeArray(value)
     } else {
+      // mycommit 如果是对象
       this.walk(value)
     }
   }
@@ -59,8 +61,10 @@ export class Observer {
    * value type is Object.
    */
   walk (obj: Object) {
+    // mycommit 如果是对象，遍历对象以key
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
+      // mycommit 使用定义响应式的函数处理当前obj
       defineReactive(obj, keys[i], obj[keys[i]])
     }
   }
@@ -109,6 +113,9 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     return
   }
   let ob: Observer | void
+  // mycommit 创建一个ob,如果已经是响应式对象了，直接返回即可，不做重复处理
+  //就是判断是不是'__ob__'，任何一个响应式对象，都会有一个'__ob__'实例
+  // 除了设置响应式外，如果动态属性加入或删除，数组有新元素加入或删除，做变更通知
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -123,12 +130,14 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (asRootData && ob) {
     ob.vmCount++
   }
+  // mycommit observe 最终返回ob 实例
   return ob
 }
 
 /**
  * Define a reactive property on an Object.
  */
+// mycommit 创建响应式对象的方法
 export function defineReactive (
   obj: Object,
   key: string,
@@ -136,6 +145,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // mycommit dep 1:1 key dep和key是一对一的关系
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -146,7 +156,7 @@ export function defineReactive (
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
-
+  // mycommit 如果子节点是对象，继续递归处理
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,

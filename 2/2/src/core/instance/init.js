@@ -37,6 +37,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // MyCommit9 还没有创建组件实例的时候会走这段，根组件的computed=>extend=>mergeDataOrFn
       // 2.可以通过this.$options访问
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),

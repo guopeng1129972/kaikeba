@@ -203,13 +203,16 @@ vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true);
 ```
 
 # Vue 的初始化过程？ new Vue()都做了什么？
-执行_init()方法；
-- 组件实例初始化属性， initLifecycle 比如$children,$root,主要是按照protp声明当前的组件所在位置
-- 整合options  合并选项  user options + system options
+
+执行\_init()方法；
+
+- 组件实例初始化属性， initLifecycle 比如$children,$root,主要是按照 protp 声明当前的组件所在位置
+- 整合 options 合并选项 user options + system options
 - 处理自定义事件 initEvents @click
 - 处理插槽信息 initRender
 - 最重要的是组件状态初始化、响应式等事情 initInjections initState initProvide
 - 两个生命周期的调用
+
 ```js
 initMixin(Vue);
 
@@ -228,4 +231,75 @@ stateMixin(Vue);
 eventsMixin(Vue);
 lifecycleMixin(Vue);
 renderMixin(Vue);
+```
+
+- vue2 中一个组件对应一个 watcher 实例，称为渲染级 watcher
+  在 watcher 中做依赖收集，调用一次 update
+- src/core/instance/lifecycle.js
+
+```js
+    updateComponent = () => {
+      // mycommit-2 组件更新函数，先执行组件render()
+      vm._update(vm._render(), hydrating)
+    }
+  }
+  //mycommit-1 在watcher中做依赖收集，执行一次190行
+  vm._watcher = new Watcher(vm, updateComponent, noop)
+      // mycommit-3 如果不存在之前组件
+    if (!prevVnode) {
+      // initial render
+      vm.$el = vm.__patch__(
+        // mycommit-4 67 将vnode赋值给真正的dom $el
+        vm.$el, vnode, hydrating, false /* removeOnly */)
+    }
+```
+
+# 数据初始化 initState(vm) //8.props data methods watch
+
+- src/core/instance/state.js
+
+```js
+// mycommit1 处理重名的优先级 props>methods>data
+if (opts.props) initProps(vm, opts.props);
+if (opts.methods) initMethods(vm, opts.methods);
+if (opts.data) {
+}
+```
+
+- 以 initData 为例，设置响应式数据 ,在最后调用 observe 当前 data
+
+```js
+// observe data
+// mycommit 递归遍历、对data做响应式处理,
+observe(data, true /* asRootData */);
+```
+
+- observe 是 export 出来的 src/core/observer/index.js
+
+```js
+let ob: Observer | void;
+// mycommit 创建一个ob,如果已经是响应式对象了，直接返回即可，不做重复处理
+//就是判断是不是'__ob__'，任何一个响应式对象，都会有一个'__ob__'实例
+// 除了设置响应式外，如果动态属性加入或删除，数组有新元素加入或删除，做变更通知
+if (hasOwn(value, "__ob__") && value.__ob__ instanceof Observer) {
+  // ...
+  // mycommit observe 最终返回ob 实例
+  return ob;
+}
+```
+- ob 实例 是new的 class Observer  src/core/observer/index.js
+```js
+// mycommit 创建响应式对象的方法
+export function defineReactive (
+  obj: Object,
+  key: string,
+  val: any,
+  customSetter?: ?Function,
+  shallow?: boolean
+) {
+  // mycommit dep 1:1 key dep和key是一对一的关系
+  const dep = new Dep()
+  // mycommit 如果子节点是对象，继续递归处理
+  let childOb = !shallow && observe(val)
+  Object.defineProperty(obj, key, {})
 ```

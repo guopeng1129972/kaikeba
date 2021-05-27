@@ -59,9 +59,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // mycommit-3 如果不存在之前组件
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(
+        // mycommit-4 67 将vnode赋值给真正的dom $el
         vm.$el, vnode, hydrating, false /* removeOnly */,
         vm.$options._parentElm,
         vm.$options._refElm
@@ -189,10 +191,11 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      // mycommit-2 组件更新函数，先执行组件render()
       vm._update(vm._render(), hydrating)
     }
   }
-
+  //mycommit-1 在watcher中做依赖收集，执行一次190行
   vm._watcher = new Watcher(vm, updateComponent, noop)
   hydrating = false
 
