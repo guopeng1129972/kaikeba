@@ -158,14 +158,20 @@ export function defineReactive (
   const setter = property && property.set
   // mycommit 如果子节点是对象，继续递归处理
   let childOb = !shallow && observe(val)
+  //mycommit 重写 Object.defineProperty
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
+      // mycommit 首次触发render，做依赖收集
+      // vue2一个组件对应一个watcher
+      // dep n:n watcher
       if (Dep.target) {
+        // mycommit 使用depend方法处理 dep n:n watcher
         dep.depend()
         if (childOb) {
+          //mycommit 如果子ob存在，也要和当前watcher建立关系
           childOb.dep.depend()
           if (Array.isArray(value)) {
             dependArray(value)

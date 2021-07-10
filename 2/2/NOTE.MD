@@ -287,7 +287,9 @@ if (hasOwn(value, "__ob__") && value.__ob__ instanceof Observer) {
   return ob;
 }
 ```
-- ob 实例 是new的 class Observer  src/core/observer/index.js
+
+- ob 实例 是 new 的 class Observer src/core/observer/index.js
+
 ```js
 // mycommit 创建响应式对象的方法
 export function defineReactive (
@@ -301,5 +303,23 @@ export function defineReactive (
   const dep = new Dep()
   // mycommit 如果子节点是对象，继续递归处理
   let childOb = !shallow && observe(val)
+  //mycommit 重写 Object.defineProperty
   Object.defineProperty(obj, key, {})
+        const value = getter ? getter.call(obj) : val
+      // mycommit 首次触发render，做依赖收集
+      // vue2一个组件对应一个watcher
+      // dep n:n watcher
+      if (Dep.target) {
+        dep.depend()
 ```
+- dep和watcher是n对n的关系是因为，在后面会有添加的watch属性，
+  产生更多的watcher,所以就会造成这种情况
+- 所以用depend的方式处理 在 src/core/observer/dep.js
+```js
+ if (childOb) {
+          //mycommit 如果子ob存在，也要和当前watcher建立关系
+          childOb.dep.depend()
+```
+## 总结
+- initState的时候 优先级 props>methods>data
+- initData 设置响应式数据 ,在最后调用 observe data
