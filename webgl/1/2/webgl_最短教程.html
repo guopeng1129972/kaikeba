@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>01-刷底色</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #canvas {
+        background-color: antiquewhite;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <script>
+      let canvas = document.querySelector("#canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      // const gl = canvas.getContext("2d"); //二维
+      const gl = canvas.getContext("webgl"); //三维
+      //使用 gl.clearColor(),设置颜色缓冲区 COLOR_BUFFER_BIT
+      gl.clearColor(1, 0, 0, 1); //rgba(0-1)相当于0-255 相当于设置 COLOR_BUFFER_BIT
+      gl.clear(gl.COLOR_BUFFER_BIT); //这块clear，想到与生效
+      // 定义一个css颜色
+      const cssColor = "rgba(255,100,88,1)";
+      const reg = RegExp(/\((.*)\)/);
+      /*  1.\(字符中的(,反斜杠表示作为参数查找
+          2.正则中的() 表示捕获括号，根据参数表示不同意思
+            (.) 表示除回车之外的所有字符；
+            (.*) 表示匹配0个或者多个；  
+      */
+      //  1.获取数据
+      const rgbaStr = reg.exec(cssColor)[1];
+      console.log(rgbaStr);
+      // 返回一个正则处理过的数组,可以通过访问0，1，index,input，length 去获取具体的数据
+      /*  0: "(255,0,0,1)"
+          1: "255,0,0,1"
+          groups: undefined
+          index: 4
+          input: "rgba(255,0,0,1)"
+          length: 2 
+      */
+      // 2.加工数据
+      const rgba = rgbaStr.split(",").map((n) => parseInt(n));
+      console.log(rgba);
+      gl.clearColor(rgba[0] / 255, rgba[1] / 255, rgba[2] / 255, rgba[3]);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    </script>
+  </body>
+</html>
