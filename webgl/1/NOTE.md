@@ -64,3 +64,14 @@ import { Color } from "https://unpkg.com/three/build/three.module.js";
   h — 色相值处于 0 到 1 之间。hue value between 0.0 and 1.0
   s — 饱和度值处于 0 到 1 之间。
   l — 亮度值处于 0 到 1 之间。
+
+# 1.6 webgl坐标系
+## webgl 3d与canvas 2d 坐标的区别
+- webgl 3d
+  1.y轴向上
+  2.以画布最大值为1
+![webgl坐标系](./img/1.png)
+- canvas 2d
+  1.y轴向下
+  2.1px为一个单位
+![canvas 2d坐标系](./img/2.png)
