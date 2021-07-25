@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>02-画布</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #canvas {
+        background-color: antiquewhite;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <script type="module">
+      import { Color } from "https://unpkg.com/three/build/three.module.js";
+      let canvas = document.querySelector("#canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const gl = canvas.getContext("webgl"); //三维
+      gl.clearColor(1, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      const color = new Color("rgba(255,0,0,1)");
+      console.log(color);
+      !(function ans() {
+        color.offsetHSL(0.005, 0, 0); //设置颜色偏移量，offsetHSL会重新计算
+        gl.clearColor(color.r, color.g, color.b, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        requestAnimationFrame(ans); //渲染下一帧的时候触发方法
+      })();
+    </script>
+  </body>
+</html>

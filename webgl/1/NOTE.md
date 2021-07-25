@@ -49,3 +49,18 @@ console.log(rgba);
 gl.clearColor(rgba[0] / 255, rgba[1] / 255, rgba[2] / 255, rgba[3]);
 gl.clear(gl.COLOR_BUFFER_BIT);
 ```
+
+# 1.5 多姿多彩的画布
+
+- 使用 three.js 引入图片资源
+
+```js
+import { Color } from "https://unpkg.com/three/build/three.module.js";
+```
+
+- .offsetHSL ( h : Float, s : Float, l : Float ) : Color
+  将给定的 h, s, 和 l 值加到当前颜色值。 内部的机制为：先将该颜色的 r, g 和 b 值转换为 HSL，然后与传入的 h, s, 和 l 相加，最后再将结果转成 RGB 值。
+- .setHSL ( h : Float, s : Float, l : Float ) : Color
+  h — 色相值处于 0 到 1 之间。hue value between 0.0 and 1.0
+  s — 饱和度值处于 0 到 1 之间。
+  l — 亮度值处于 0 到 1 之间。
