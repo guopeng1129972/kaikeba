@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>03.canvas2d绘制一个矩形</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #canvas {
+        background-color: antiquewhite;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <script type="module">
+      //canvas画布
+      const canvas = document.getElementById("canvas");
+      //二维画笔
+      const ctx = canvas.getContext("2d");
+      //设置画笔的颜色
+      ctx.fillStyle = "red";
+      //用画笔画一个矩形
+      ctx.fillRect(20, 20, 300, 200);
+    </script>
+  </body>
+</html>
