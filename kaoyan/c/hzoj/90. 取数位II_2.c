@@ -8,7 +8,7 @@
 int main()
 {
   // int 2的31次方 个
-  char str[15] = {0};
+  char str[15] = {0}; //字符数组的清空
   scanf("%s", &str);
   // printf("%d\n", a / 100);
   // for (int i = 0; i < strlen(str); i++)
